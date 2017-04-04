@@ -12,7 +12,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.location.Address;
@@ -43,6 +46,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      *      MyLocationlayer -> Un bton para mostrar la posicion actual del usuario
      */
 
+
+    /**
+     * Tipos de mapas
+     * - GoogleMap.MAP_TYPE_NONE -> Grid vacío
+     * - GoogleMap.MAP_TYPE_NORMAL -> Estándar
+     * - GoogleMap.MAP_TYPE_SATELLITE -> Vista por satélite
+     * - GoogleMap.MAP_TYPE_HYBRID -> Mix
+     * - GoogleMap.MAP_TYPE_TERRAIN -> Info topográfica
+     */
+
     double latitude;
     double longitude;
 
@@ -58,6 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String State;
     String ZipCode;
     String Country;
+    UiSettings mapSettings;
 
     private static final int LOCATION_REQUEST_CODE = 101;
 
@@ -68,6 +82,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
+        requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
+
         mapFragment.getMapAsync(this);
 
 /*        try {
@@ -103,7 +120,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.i(TAG2, "Country: " + Country);
         }*/
 
-        requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, LOCATION_REQUEST_CODE);
+
     }
 
     protected void requestPermission(String permissionType, int requestCode) {
@@ -138,12 +155,68 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
- /*       // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
+        //Modificar mapa
+        if(mMap != null)
+            mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
-        if (mMap != null) {
+        //Mostrar controles a los usuarios
+        mapSettings = mMap.getUiSettings();
+            //Zoom
+            //XML: map:uiZoomControls="true"
+        mapSettings.setZoomControlsEnabled(true);
+
+            //Brújula
+            //XML: map:uiCompass="true"
+        mapSettings.setCompassEnabled(true);
+
+            //Gestos
+            //XMl: map:uiZoomGestures="true"
+        mapSettings.setZoomGesturesEnabled(true);
+
+            //Scrolling / Panning
+            //XML: map:uiScrollGestures="true"
+        mapSettings.setScrollGesturesEnabled(true);
+
+            //Tilt -> Para ver los edificios en 3D
+            //XML: map:uiTiltGestures="true"
+        mapSettings.setTiltGesturesEnabled(true);
+
+            //Rotation
+            //XML:uiRotateGestures="true"
+        mapSettings.setRotateGesturesEnabled(true);
+
+
+        //Añadir un Marcador
+        LatLng MUSEO = new LatLng(40.4137859, -3.6943211);
+        Marker museo = mMap.addMarker(new MarkerOptions()
+                .position(MUSEO)
+                .title("Museo del prado")
+                .snippet("Hola hola"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(MUSEO));
+
+
+        //Mercator Projection
+        /**
+         * - Target -> Localizacion del centro del mapa
+         * - Zoom -> Nivel de zoom
+         * - Tilt -> Ángulo de la camara
+         * - Bearing -> Orientación del mapa en grados medido en el sentido de las agujas del reloj desde el polo Norte
+         *
+         *      CameraUpdate -> CameraUpdateFactory
+         *
+         */
+
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MUSEO, 15));
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(MUSEO)
+                .zoom(16)
+                .bearing(70)
+                .tilt(25)
+                .build();
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+/*        if (mMap != null) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -155,6 +228,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return;
             }
             mMap.setMyLocationEnabled(true);
-        }
+        }*/
     }
 }
